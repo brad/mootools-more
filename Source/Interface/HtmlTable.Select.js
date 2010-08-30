@@ -14,7 +14,7 @@ authors:
   - Aaron Newton
 
 requires:
-  - /Keyboard
+  - /Keyboard.Extras
   - /HtmlTable
   - /Class.refactor
   - /Element.Delegation
@@ -101,11 +101,8 @@ HtmlTable = Class.refactor(HtmlTable, {
 	},
 
 	selectAll: function(selectNone){
-		if (!this.options.allowMultiSelect && !selectNone) return;
-		Array.each(this.body.rows, function(row){
-			if (selectNone) this.deselectRow(row);
-			else this.selectRow(row);
-		}, this);
+		if (!selectNone && !this.options.allowMultiSelect) return;
+		this.selectRange(0, this.body.rows.length, selectNone);
 		return this;
 	},
 
@@ -115,19 +112,26 @@ HtmlTable = Class.refactor(HtmlTable, {
 
 	selectRange: function(startRow, endRow, _deselect){
 		if (!this.options.allowMultiSelect) return;
-		var started,
-		    method = _deselect ? 'deselectRow' : 'selectRow';
+		var method = _deselect ? 'deselectRow' : 'selectRow',
+		    rows = $A(this.body.rows);
 
-		$$(this.body.rows).each(function(row) {
-			if (row == startRow || row == endRow) started = !started;
-			if (started || row == startRow || row == endRow) this[_deselect ? 'deselectRow' : 'selectRow'](row, true);
-		}, this);
+		if ($type(startRow) == 'element') startRow = rows.indexOf(startRow);
+		if ($type(endRow) == 'element') endRow = rows.indexOf(endRow);
+		endRow = endRow < rows.length - 1 ? endRow : rows.length - 1; 
+
+		if (endRow < startRow) {
+			var tmp = startRow;
+			startRow = endRow;
+			endRow = tmp;
+		}
+
+		for(var i = startRow; i <= endRow; i++) this[method](rows[i], true);
 
 		return this;
 	},
 
-	deselectRange: function(startRow, endRow, _nocheck){
-		this.selectRange(startRow, endRow, _nocheck);
+	deselectRange: function(startRow, endRow){
+		this.selectRange(startRow, endRow, true);
 	},
 /*
 	Private methods:
@@ -203,15 +207,12 @@ HtmlTable = Class.refactor(HtmlTable, {
 						e.preventDefault();
 						var to = this.body.rows[this._getRowByOffset(offset)];
 						if (e.shift && to && this.isSelected(to)) {
-							console.log('moving, deslecting row');
 							this.deselectRow(this._focused);
 							this._focused = to;
 						} else {
 							if (to && (!this.options.allowMultiSelect || !e.shift)) {
-								console.log('select none');
 								this.selectNone();
 							}
-							console.log('shifting focus');
 							this._shiftFocus(offset, e);
 						}
 						if (held) {
