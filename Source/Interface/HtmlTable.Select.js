@@ -110,7 +110,7 @@ HtmlTable = Class.refactor(HtmlTable, {
 
 	selectAll: function(selectNone){
 		if (!selectNone && !this.options.allowMultiSelect) return;
-		this.selectRange(0, this.body.rows.length, selectNone);
+		this.selectRange(0, this.body.rows.length, !this.options.noSelectForHiddenRows, selectNone);
 		return this;
 	},
 
@@ -132,15 +132,14 @@ HtmlTable = Class.refactor(HtmlTable, {
 			startRow = endRow;
 			endRow = tmp;
 		}
-
 		for(var i = startRow; i <= endRow; i++) {
-			if (selectHidden || row.isDisplayed()) this[method](rows[i], true);
+			if (selectHidden || rows[i].isDisplayed()) this[method](rows[i], true);
 		}
 
 		return this;
 	},
 
-	deselectRange: function(startRow, endRow, _nocheck){
+	deselectRange: function(startRow, endRow){
 		this.selectRange(startRow, endRow, !this.options.noSelectForHiddenRows, true);
 	},
 
@@ -187,6 +186,7 @@ HtmlTable = Class.refactor(HtmlTable, {
 		else this.toggleRow(row);
 		if (event.shift) {
 			this.selectRange(this._rangeStart || this.body.rows[0], row, !this.options.noSelectForHiddenRows, this._rangeStart ? !this.isSelected(row) : true);
+			this._focused = row;
 		}
 		this._rangeStart = row;
 	},
