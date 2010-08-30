@@ -176,6 +176,7 @@ HtmlTable = Class.refactor(HtmlTable, {
 		else this.toggleRow(row);
 		if (event.shift) {
 			this.selectRange(this._rangeStart || this.body.rows[0], row, this._rangeStart ? !this.isSelected(row) : true);
+			this._focused = row;
 		}
 		this._rangeStart = row;
 	},
