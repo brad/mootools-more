@@ -87,7 +87,7 @@ Element.Properties.validatorProps = {
 					var split = cls.split(':');
 					if (split[1]) {
 						try {
-							props[split[0]] = JSON.decode(split[1]);
+							props[split.shift()] = JSON.decode(split.join(':'));
 						} catch(e) {}
 					}
 				});
